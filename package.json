@@ -5,6 +5,7 @@
   "main": "dist/auth.js",
   "scripts": {
     "build": "tsc",
+    "test:rls": "node dist/test-rls.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
