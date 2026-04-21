@@ -60,12 +60,33 @@ async function runSecurityTests() {
     if (selectError) console.log("❌ Erreur SELECT :", selectError.message);
     console.log("Tasks Samuel (vues):", tasks?.length);
 
-    // Test 5 : samuel ne peut pas modifier la tâche de jeremy
-    // Remplacer 'UUID-Jeremy ' par un vrai UUID d'un autre utilisateur pour un test réel
+    // Test 5 : Samuel tente de modifier sa PROPRE tâche
+    console.log("\nTest 5: Samuel modifie sa propre tâche...");
+    const { data: samuelTask } = await supabase
+      .from("tasks")
+      .select("id")
+      .eq("assigned_to", userId)
+      .limit(1)
+      .single();
+
+    if (samuelTask) {
+      const { error: ownUpdateError } = await supabase
+        .from("tasks")
+        .update({ title: "Ma tâche modifiée par moi-même" })
+        .eq("id", samuelTask.id);
+      
+      if (ownUpdateError) {
+        console.log("❌ Erreur inattendue :", ownUpdateError.message);
+      } else {
+        console.log("✅ Succès : Samuel a pu modifier sa propre tâche.");
+      }
+    } else {
+      console.log("ℹ️ Aucune tâche de Samuel trouvée pour ce test.");
+    }
+
+    // Test 6 : Samuel peut modifier la tâche de Jérémy (Mode Collaboratif)
     const jeremyUserId = process.env.User_Auth_uuid_Test_1 || " ";
-    console.log(
-      `\nTest 6: Tentative de modifier une tâche appartenant à ${jeremyUserId}...`,
-    );
+    console.log(`\nTest 6: Tentative de modifier la tâche de Jérémy (${jeremyUserId}) en tant que membre...`);
 
     const { data: jeremyTask } = await supabase
       .from("tasks")
@@ -75,29 +96,24 @@ async function runSecurityTests() {
       .single();
 
     if (jeremyTask) {
-      const { error: updateError } = await supabase
+      const { error: collabUpdateError } = await supabase
         .from("tasks")
-        .update({ title: "Hacked by samuel" })
+        .update({ title: "Modifié par Samuel (Collaboration)" })
         .eq("id", jeremyTask.id);
 
-      if (updateError) {
-        console.log("✅ Modif refusée :", updateError.message);
+      if (collabUpdateError) {
+        console.log("❌ Erreur (Le RLS a bloqué) :", collabUpdateError.message);
       } else {
-        console.log("⚠️  Alerte : samuel a pu modifier la tâche de Jeremy !");
+        console.log("✅ Succès : Samuel a pu modifier la tâche de Jérémy (Comportement collaboratif attendu).");
       }
     } else {
-      console.log(
-        "ℹ️ Aucune tâche de Jeremy trouvée pour le test de modification.",
-      );
+      console.log("ℹ️ Aucune tâche de Jérémy trouvée pour le test de collaboration.");
     }
 
     await signOut();
     console.log("\n✅ Déconnecté.");
   } catch (err: any) {
     console.log("\n❌ Erreur lors des tests authentifiés :", err.message);
-    console.log(
-      "💡 Assurez-vous que l'utilisateur Alice existe et que ses credentials sont corrects.",
-    );
   }
 
   console.log("\n--- Fin des tests ---");

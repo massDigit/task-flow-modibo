@@ -116,22 +116,35 @@ Test 2: Tentative d'insertion (non authentifié)
 
 ---
 
-## 🔐 Phase 4 : Gestion des Rôles et Granularité RLS
+## 🔐 Phase 4 : Gestion des Permissions et Modèle Collaboratif
 
-### Problème : Fausse alerte de sécurité
-Lors des tests, Samuel (utilisateur A) a pu modifier une tâche appartenant à Jérémy (utilisateur B). 
+### Évolution de la Stratégie de Sécurité
 
-**Analyse :** La politique `tasks_update` autorisait la modification pour les rôles `admin` et `owner`. Samuel ayant été inséré sans rôle spécifique, il a hérité d'un rôle privilégié ou la politique était trop large.
+Initialement, nous avions configuré le RLS pour restreindre la modification des tâches à l'assigné ou au propriétaire du projet uniquement.
 
-### Solution appliquée
-Mise en place d'une distinction stricte entre les permissions d'administration et les permissions d'exécution :
-- **Lecture :** Tout membre du projet voit tout.
-- **Modification :** Uniquement l'assigné (`assigned_to`) OU un administrateur du projet.
+**Décision Finale :** Nous avons opté pour un **modèle collaboratif**, où n'importe quel membre d'un projet a le droit de lire et de modifier n'importe quelle tâche de ce même projet. Cela facilite la coordination au sein de l'équipe sans imposer de verrous bloquants pour les coéquipiers.
 
-**SQL de test pour corriger le rôle :**
+### Mise en œuvre RLS (Collaboration)
+
+La politique `tasks_update` a été simplifiée pour s'appuyer sur l'appartenance au projet via la table `project_members`.
+
+**SQL final appliqué :**
+
 ```sql
-UPDATE project_members SET role = 'member' WHERE user_id = 'ID_SAMUEL';
+CREATE POLICY "tasks_update" ON "public"."tasks"
+FOR UPDATE TO authenticated
+USING (
+  project_id IN (SELECT project_id FROM project_members WHERE user_id = auth.uid())
+)
+WITH CHECK (
+  project_id IN (SELECT project_id FROM project_members WHERE user_id = auth.uid())
+);
 ```
 
-### Résultat attendu après correction
-Le test 6 doit désormais afficher : `✅ Modif refusée : new row violates row-level security policy for table "tasks"`.
+### Validation Finale du Test de Sécurité
+
+Le script de test `test-rls.ts` valide désormais que :
+
+- Samuel peut modifier ses propres tâches.
+- Samuel peut modifier la tâche de Jérémy (car ils font partie du même projet).
+- Un utilisateur anonyme ou non-membre reste strictement bloqué.
