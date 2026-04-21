@@ -17,7 +17,7 @@ export async function validate_task(
   request: HttpRequest,
   context: InvocationContext,
 ): Promise<HttpResponseInit> {
-  const authHeader = request.headers["authorization"];
+  const authHeader = request.headers.get("Authorization");
   if (!authHeader) {
     return { status: 401, body: "Non authentifié" };
   }

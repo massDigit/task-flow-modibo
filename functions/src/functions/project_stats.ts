@@ -10,7 +10,7 @@ export async function project_stats(
   request: HttpRequest,
   context: InvocationContext,
 ): Promise<HttpResponseInit> {
-  const projectId = request.query["project_id"];
+  const projectId = request.query.get("project_id");
   if (!projectId) {
     return { status: 400, body: "project_id requis" };
   }
