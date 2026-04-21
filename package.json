@@ -8,6 +8,7 @@
     "test:rls": "node dist/test-rls.js",
     "watch:samuel": "node dist/samuel-watch.js",
     "act:jeremy": "node dist/jeremy-actions.js",
+    "test:integration": "node --loader ts-node/esm integration.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
