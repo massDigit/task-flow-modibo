@@ -65,6 +65,39 @@ Mise en place de `realtime.ts` (Channels) et tests croisés avec `samuel-watch.t
 
 ---
 
+## Phase 4 : Azure Functions, notifications par email:
+
+Pour la mise en place de la fonction Azure, nous avons créé un dossier functions setup avec la stack suivante:
+- Typescript
+- Docker
+- NodeJS 22
+
+Plusieurs diffciultés on été rencontrées et corrigées:
+- nom de la fonction en kebab-case (avec des `-`) => Impossible de build le TS car le nom de fonction n'était pas valide => Remplacement des `-` par des `_`
+- TP en JS et code en TS => Temps passé a ré-adapter le code en TS
+- Fonction non visible sur l'interface d'Azure après déploiement => Il fallait build le TS en JS (remarqué en regardant le fichier `.funcignore`)
+
+### Captures d'écran
+![mail reçu lors du changement d'assigné](screenshots/mail.png "Mail de notification")
+
+![table de logs du webhook Supabase](screenshots/logs-webhook-supabase.png "Logs webhook Supabase")
+
+### URL AZURE
+
+`https://fn-taskflowmodibo.azurewebsites.net/api/notify_assigned`
+
+
+## Phase 5: Azure functions, logique métier
+
+Toutes les complications majeures ont été rencontrées lors de la phase précédente, les seules 
+
+### URL AZURE
+`https://fn-taskflowmodibo.azurewebsites.net/api/manage_members`
+`https://fn-taskflowmodibo.azurewebsites.net/api/project_stats`
+`https://fn-taskflowmodibo.azurewebsites.net/api/validate_task`
+
+---
+
 ## 🔐 État de Validation Final (Phase 3 terminée)
 
 - [✅] Code 100% TypeScript (Build OK)
