@@ -6,6 +6,8 @@
   "scripts": {
     "build": "tsc",
     "test:rls": "node dist/test-rls.js",
+    "watch:samuel": "node dist/samuel-watch.js",
+    "act:jeremy": "node dist/jeremy-actions.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -22,7 +24,8 @@
   "homepage": "https://github.com/massDigit/task-flow-modibo#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.104.0",
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "uploadthing": "^6.12.0"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
